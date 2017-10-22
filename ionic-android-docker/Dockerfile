@@ -65,6 +65,8 @@ RUN unzip ${ANDROID_HOME}/temp/*.zip -d ${ANDROID_HOME}
 
 # Test First Build so that it will be faster later
 RUN cd myApp && \
+    ionic cordova build android --prod --no-interactive --release && \
+    ionic cordova plugin add cordova-plugin-crosswalk-webview && \
     ionic cordova build android --prod --no-interactive --release
 
 WORKDIR myApp
