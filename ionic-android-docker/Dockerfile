@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     NPM_VERSION=5.5.1 \
     IONIC_VERSION=3.16.0 \
     CORDOVA_VERSION=7.1.0 \
-    GRADLE_VERSION=4.3.0
+    GRADLE_VERSION=4.3
 
 # Install basics
 RUN apt-get update &&  \
