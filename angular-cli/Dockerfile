@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:8-alpine
 
 # install angular-cli as node user
 RUN chown -R node:node /usr/local/lib/node_modules \
