@@ -1,12 +1,18 @@
 FROM node:8-alpine
 
+# Add packages needed to build native dependencies
+RUN apk add --no-cache \
+    git \
+    python \
+    python-dev \
+    py-pip \
+    build-base \
+    libc6-compat \
+  && pip install virtualenv
+
 # install angular-cli as node user
 RUN chown -R node:node /usr/local/lib/node_modules \
   && chown -R node:node /usr/local/bin
-
-# install git
-RUN apk update && apk upgrade && \
-    apk add --no-cache bash git openssh
 
 USER node
 RUN npm install -g @angular/cli@1.6.5
