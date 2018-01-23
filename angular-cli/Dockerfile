@@ -9,7 +9,7 @@ RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh
 
 USER node
-RUN npm install -g @angular/cli@1.6.4
+RUN npm install -g @angular/cli@1.6.5
 
 # set npm as default package manager for root
 USER root
