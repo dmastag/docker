@@ -3,11 +3,11 @@ LABEL maintainer="bitard [dot] michael [at] gmail [dot] com"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     ANDROID_HOME=/opt/android-sdk-linux \
-    NODE_VERSION=8.9.3 \
-    NPM_VERSION=5.6.0 \
-    IONIC_VERSION=3.19.0 \
+    NODE_VERSION=8.11.2 \
+    NPM_VERSION=6.1.0 \
+    IONIC_VERSION=rc \
     CORDOVA_VERSION=8.0.0 \
-    GRADLE_VERSION=4.3.1
+    GRADLE_VERSION=4.8
 
 # Install basics
 RUN apt-get update &&  \
@@ -21,7 +21,7 @@ RUN apt-get update &&  \
     gem install sass && \
     git config --global user.email "you@example.com" && \
     git config --global user.name "Your Name" && \
-    ionic start myApp sidemenu --no-interactive
+    ionic start myApp sidemenu --type=angular --no-interactive
 #ANDROID
 #JAVA
 
