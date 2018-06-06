@@ -15,7 +15,7 @@ RUN chown -R node:node /usr/local/lib/node_modules \
   && chown -R node:node /usr/local/bin
 
 USER node
-RUN npm install -g @angular/cli@6.0.3
+RUN npm install -g @angular/cli@6.0.4
 
 # set npm as default package manager for root
 USER root
