@@ -1,6 +1,10 @@
 FROM node:8-alpine
 LABEL maintainer="Julian Alimin"
 
+# References
+# https://hub.docker.com/r/greyfoxit/alpine-glibc/~/dockerfile/
+# https://hub.docker.com/r/greyfoxit/alpine-android/~/dockerfile/
+# https://github.com/docker-library/openjdk/blob/master/8-jre/alpine/Dockerfile
 
 # install JRE 8 see: https://github.com/docker-library/openjdk/blob/master/8-jre/alpine/Dockerfile
 
@@ -82,16 +86,83 @@ RUN apk add --no-cache wget && \
 
 ENV PATH ${PATH}:/opt/gradle/gradle-"$GRADLE_VERSION"/bin
 
+# install GNU C library (glibc)
+
+RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
+    ALPINE_GLIBC_PACKAGE_VERSION="2.26-r0" && \
+    ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+    ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+    ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" \
+    && apk add --no-cache --virtual=.build-dependencies wget ca-certificates \
+    && wget "https://raw.githubusercontent.com/andyshinn/alpine-pkg-glibc/master/sgerrand.rsa.pub" \
+        -O "/etc/apk/keys/sgerrand.rsa.pub" \
+    && wget "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+         "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+         "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" \
+    && apk add --no-cache "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" \
+    && rm "/etc/apk/keys/sgerrand.rsa.pub" \
+    && /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 C.UTF-8 || true \
+    && echo "export LANG=C.UTF-8" > /etc/profile.d/locale.sh \
+    && apk del glibc-i18n \
+    && rm "/root/.wget-hsts" \
+    && apk del .build-dependencies \
+    && rm "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+       "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
+
+ENV LANG=C.UTF-8
+
+# Credits:
+#
+# Vlad Frolov @frol
+# Andy Shinn @andyshinn
+
 # Install basics
-RUN npm install -g cordova@"$CORDOVA_VERSION" ionic@"$IONIC_VERSION"
+RUN npm install -g cordova@"$CORDOVA_VERSION"
+# RUN npm install -g cordova@"$CORDOVA_VERSION" ionic@"$IONIC_VERSION" && \
 #     # git config --global user.email "you@example.com" && \
 #     # git config --global user.name "Your Name" && \
-#     ionic start myApp sidemenu --no-interactive
+    # ionic start myApp sidemenu --no-interactive
 
+RUN rm -rf /root/.gradle/wrapper/dists/*
+
+ENV	PATH=$PATH:$ANDROID_HOME/build-tools/27.0.1
+
+# RUN wget https://github.com/maoxm/zipalign/raw/master/zipalign -P $ANDROID_HOME/tools && \
+#     chmod u+x $ANDROID_HOME/tools/zipalign
+# RUN sdkmanager --list | grep zipalign
+# RUN zipalign
 # # Test First Build so that it will be faster later
 # RUN cd myApp && \
-#     ionic cordova platform add android@7.1.1 --no-interactive && \
+    # ionic cordova platform add android@7.1.1 --no-interactive && \
 #     # ionic cordova plugin add cordova-plugin-firebase --no-interactive && \
 #     # ionic cordova build android --prod --no-interactive --release && \
 #     # ionic cordova plugin add cordova-plugin-crosswalk-webview --no-interactive && \
-#     ionic cordova build android --prod --no-interactive --release
+    # ionic cordova build android --prod --no-interactive --release && \
+    # ionic cordova build android --no-interactive
+
+# ADD . /usr/app
+
+# WORKDIR /usr/app
+# RUN npm install
+# # RUN node scripts/bumpVersion.js android
+# RUN cordova platform add android@7.1.1
+# # RUN cordova prepare android
+# # RUN ionic cordova plugin add cordova-plugin-android-permissions
+# # RUN ionic cordova plugin add phonegap-plugin-barcodescanner --variable CAMERA_USAGE_DESCRIPTION="This app requires camera access to function properly."
+# # RUN ionic cordova plugin add cordova.plugins.diagnostic.api-22@2.3.10-api-22
+# # RUN ionic cordova plugin add https://github.com/vstirbu/PromisesPlugin.git
+# # RUN ionic cordova plugin add https://github.com/xmartlabs/cordova-plugin-market
+# # RUN ionic cordova plugin add https://github.com/apache/cordova-plugin-screen-orientation
+# # RUN ionic cordova plugin add https://github.com/danishin/WifiWizard.git
+# # RUN ionic cordova plugin add https://github.com/apache/cordova-plugin-statusbar.git
+# # RUN ionic cordova plugin add cordova-plugin-crosswalk-webview
+# RUN cordova build android
+# RUN cordova build android --release
+# RUN cp platforms/android/build/outputs/apk/*.apk build-apk | true
+# RUN node scripts/updateConfigToSingle.js
+# RUN cordova plugin rm cordova-plugin-crosswalk-webview
+# RUN cordova build android
+# RUN cordova build android --release
+# # RUN mv platforms/android/build/outputs/apk/android-release-unsigned.apk platforms/android/build/outputs/apk/android-release-unsigned-21.apk | true
+# RUN cp platforms/android/build/outputs/apk/*.apk build-apk | true
