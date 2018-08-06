@@ -128,4 +128,4 @@ RUN npm install -g cordova@"$CORDOVA_VERSION"
 
 RUN rm -rf /root/.gradle/wrapper/dists/*
 
-ENV	PATH=$PATH:$ANDROID_HOME/build-tools/27.0.1
+ENV	PATH=$PATH:$ANDROID_HOME/build-tools/28.0.0
