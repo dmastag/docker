@@ -71,9 +71,7 @@ RUN mkdir -p /root/.android && \
     sdkmanager --update && yes | sdkmanager --licenses && \
     sdkmanager --package_file=$ANDROID_HOME/packages.txt
 
-ENV IONIC_VERSION=4.0.2 \
-    CORDOVA_VERSION=8.0.0 \
-    GRADLE_VERSION=4.9
+ENV GRADLE_VERSION=4.9
 
 # Install Gradle
 RUN apk add --no-cache wget && \
@@ -118,6 +116,10 @@ ENV LANG=C.UTF-8
 # Andy Shinn @andyshinn
 
 # Install basics
+
+
+ENV CORDOVA_VERSION=8.0.0
+
 RUN npm install -g cordova@"$CORDOVA_VERSION"
 # RUN npm install -g cordova@"$CORDOVA_VERSION" ionic@"$IONIC_VERSION" && \
 #     # git config --global user.email "you@example.com" && \
@@ -127,42 +129,3 @@ RUN npm install -g cordova@"$CORDOVA_VERSION"
 RUN rm -rf /root/.gradle/wrapper/dists/*
 
 ENV	PATH=$PATH:$ANDROID_HOME/build-tools/27.0.1
-
-# RUN wget https://github.com/maoxm/zipalign/raw/master/zipalign -P $ANDROID_HOME/tools && \
-#     chmod u+x $ANDROID_HOME/tools/zipalign
-# RUN sdkmanager --list | grep zipalign
-# RUN zipalign
-# # Test First Build so that it will be faster later
-# RUN cd myApp && \
-    # ionic cordova platform add android@7.1.1 --no-interactive && \
-#     # ionic cordova plugin add cordova-plugin-firebase --no-interactive && \
-#     # ionic cordova build android --prod --no-interactive --release && \
-#     # ionic cordova plugin add cordova-plugin-crosswalk-webview --no-interactive && \
-    # ionic cordova build android --prod --no-interactive --release && \
-    # ionic cordova build android --no-interactive
-
-# ADD . /usr/app
-
-# WORKDIR /usr/app
-# RUN npm install
-# # RUN node scripts/bumpVersion.js android
-# RUN cordova platform add android@7.1.1
-# # RUN cordova prepare android
-# # RUN ionic cordova plugin add cordova-plugin-android-permissions
-# # RUN ionic cordova plugin add phonegap-plugin-barcodescanner --variable CAMERA_USAGE_DESCRIPTION="This app requires camera access to function properly."
-# # RUN ionic cordova plugin add cordova.plugins.diagnostic.api-22@2.3.10-api-22
-# # RUN ionic cordova plugin add https://github.com/vstirbu/PromisesPlugin.git
-# # RUN ionic cordova plugin add https://github.com/xmartlabs/cordova-plugin-market
-# # RUN ionic cordova plugin add https://github.com/apache/cordova-plugin-screen-orientation
-# # RUN ionic cordova plugin add https://github.com/danishin/WifiWizard.git
-# # RUN ionic cordova plugin add https://github.com/apache/cordova-plugin-statusbar.git
-# # RUN ionic cordova plugin add cordova-plugin-crosswalk-webview
-# RUN cordova build android
-# RUN cordova build android --release
-# RUN cp platforms/android/build/outputs/apk/*.apk build-apk | true
-# RUN node scripts/updateConfigToSingle.js
-# RUN cordova plugin rm cordova-plugin-crosswalk-webview
-# RUN cordova build android
-# RUN cordova build android --release
-# # RUN mv platforms/android/build/outputs/apk/android-release-unsigned.apk platforms/android/build/outputs/apk/android-release-unsigned-21.apk | true
-# RUN cp platforms/android/build/outputs/apk/*.apk build-apk | true
