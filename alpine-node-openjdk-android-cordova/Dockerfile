@@ -48,7 +48,7 @@ RUN set -x \
 
 # Setup
 
-ENV VERSION_SDK_TOOLS=4333796 \
+ENV VERSION_SDK_TOOLS=3952940 \
 	  ANDROID_HOME=/usr/local/android-sdk-linux
 
 ENV	PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
