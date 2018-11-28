@@ -30,7 +30,7 @@ RUN { \
 		echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
 	} > /usr/local/bin/docker-java-home \
 	&& chmod +x /usr/local/bin/docker-java-home
-ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk/jre
+ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 
 ENV JAVA_VERSION 8u181
@@ -38,7 +38,7 @@ ENV JAVA_ALPINE_VERSION 8.181.13-r0
 
 RUN set -x \
 	&& apk add --no-cache \
-		openjdk8-jre="$JAVA_ALPINE_VERSION" \
+		openjdk8="$JAVA_ALPINE_VERSION" \
 	&& [ "$JAVA_HOME" = "$(docker-java-home)" ]
 
 # If you're reading this and have any feedback on how this image could be
@@ -51,7 +51,7 @@ RUN set -x \
 # https://github.com/jangrewe/gitlab-ci-android/issues/23
 # https://issuetracker.google.com/issues/66465833
 
-ENV VERSION_SDK_TOOLS=3952940 \
+ENV VERSION_SDK_TOOLS=4333796 \
 	  ANDROID_HOME=/usr/local/android-sdk-linux
 
 ENV	PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
@@ -71,8 +71,19 @@ ADD packages.txt $ANDROID_HOME
 
 RUN mkdir -p /root/.android && \
     touch /root/.android/repositories.cfg && \
-    sdkmanager --update && yes | sdkmanager --licenses && \
-    sdkmanager --package_file=$ANDROID_HOME/packages.txt
+    sdkmanager --update && yes | sdkmanager --licenses
+
+RUN sdkmanager "add-ons;addon-google_apis-google-24" --verbose
+RUN sdkmanager "add-ons;addon-google_apis-google-24" --verbose
+RUN sdkmanager "build-tools;28.0.3" --verbose
+RUN sdkmanager "extras;android;m2repository" --verbose
+RUN sdkmanager "extras;google;google_play_services" --verbose
+RUN sdkmanager "extras;google;m2repository" --verbose
+RUN sdkmanager "platform-tools" --verbose
+RUN sdkmanager "platforms;android-28" --verbose
+RUN sdkmanager "extras;google;instantapps" --verbose
+RUN sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2" --verbose
+RUN sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2" --verbose
 
 ENV GRADLE_VERSION=5.0
 
@@ -141,10 +152,13 @@ ENV LANG=C.UTF-8
 ENV CORDOVA_VERSION=8.1.2
 
 RUN npm install -g cordova@"$CORDOVA_VERSION"
+
 # RUN npm install -g cordova@"$CORDOVA_VERSION" ionic@"$IONIC_VERSION" && \
-#     # git config --global user.email "you@example.com" && \
-#     # git config --global user.name "Your Name" && \
-    # ionic start myApp sidemenu --no-interactive
+#     git config --global user.email "you@example.com" && \
+#     git config --global user.name "Your Name" && \
+#     ionic start myApp sidemenu --no-interactive
+
+# RUN cd myApp && ionic cordova build android --release
 
 RUN rm -rf /root/.gradle/wrapper/dists/*
 
