@@ -13,8 +13,8 @@ RUN apk add --no-cache \
 ARG DOCKER_MACHINE_VERSION
 ARG DUMB_INIT_VERSION
 
-COPY gitlab-runner-linux-amd64 /usr/bin/gitlab-runner
-COPY checksums /tmp/
+RUN wget -O /usr/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
+
 RUN chmod +x /usr/bin/gitlab-runner && \
     ln -s /usr/bin/gitlab-runner /usr/bin/gitlab-ci-multi-runner && \
     gitlab-runner --version && \
@@ -25,8 +25,7 @@ RUN chmod +x /usr/bin/gitlab-runner && \
     docker-machine --version && \
     wget -q https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 -O /usr/bin/dumb-init && \
     chmod +x /usr/bin/dumb-init && \
-    dumb-init --version && \
-    sha256sum -c -w /tmp/checksums
+    dumb-init --version 
 
 COPY entrypoint /
 RUN chmod +x /entrypoint
