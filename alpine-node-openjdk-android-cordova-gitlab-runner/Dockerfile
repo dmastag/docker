@@ -19,17 +19,18 @@ RUN chmod +x /usr/bin/gitlab-runner && \
     ln -s /usr/bin/gitlab-runner /usr/bin/gitlab-ci-multi-runner && \
     gitlab-runner --version && \
     mkdir -p /etc/gitlab-runner/certs && \
-    chmod -R 700 /etc/gitlab-runner && \
-    wget -q https://github.com/docker/machine/releases/download/v${DOCKER_MACHINE_VERSION}/docker-machine-Linux-x86_64 -O /usr/bin/docker-machine && \
-    chmod +x /usr/bin/docker-machine && \
-    docker-machine --version && \
-    wget -q https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 -O /usr/bin/dumb-init && \
-    chmod +x /usr/bin/dumb-init && \
-    dumb-init --version 
+    chmod -R 700 /etc/gitlab-runner 
+    # && \
+    # wget -q https://github.com/docker/machine/releases/download/v${DOCKER_MACHINE_VERSION}/docker-machine-Linux-x86_64 -O /usr/bin/docker-machine && \
+    # chmod +x /usr/bin/docker-machine && \
+    # docker-machine --version && \
+    # wget -q https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 -O /usr/bin/dumb-init && \
+    # chmod +x /usr/bin/dumb-init && \
+    # dumb-init --version 
 
-COPY entrypoint /
-RUN chmod +x /entrypoint
+# COPY entrypoint /
+# RUN chmod +x /entrypoint
 
 VOLUME ["/etc/gitlab-runner", "/home/gitlab-runner"]
-ENTRYPOINT ["/usr/bin/dumb-init", "/entrypoint"]
+# ENTRYPOINT ["/usr/bin/dumb-init", "/entrypoint"]
 CMD ["run", "--user=gitlab-runner", "--working-directory=/home/gitlab-runner"]
