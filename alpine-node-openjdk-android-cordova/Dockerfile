@@ -80,6 +80,7 @@ RUN sdkmanager "extras;android;m2repository" --verbose
 RUN sdkmanager "extras;google;google_play_services" --verbose
 RUN sdkmanager "extras;google;m2repository" --verbose
 RUN sdkmanager "platform-tools" --verbose
+RUN sdkmanager "platforms;android-27" --verbose
 RUN sdkmanager "platforms;android-28" --verbose
 RUN sdkmanager "extras;google;instantapps" --verbose
 RUN sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2" --verbose
