@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 # COPY package.json package-lock.json /usr/src/app/
 # RUN npm install
 
-ADD . /usr/src/app
+ADD ./prebuild-alpine-node-openjdk-android-cordova /usr/src/app
 
 RUN cordova platform add android@8.0.0 && \
     cordova prepare android && \
