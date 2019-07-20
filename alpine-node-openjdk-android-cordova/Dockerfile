@@ -1,6 +1,14 @@
 FROM node:alpine
 LABEL maintainer="Julian Alimin"
 
+# # Update References
+# https://github.com/docker-library/openjdk/blob/master/8/jre/alpine/Dockerfile
+# https://developer.android.com/studio/#downloads
+# https://gradle.org/releases/
+# https://github.com/frol/docker-alpine-glibc/blob/master/Dockerfile
+# https://www.npmjs.com/package/cordova
+# https://developer.android.com/studio/releases/build-tools
+
 # References
 # https://hub.docker.com/r/greyfoxit/alpine-glibc/~/dockerfile/
 # https://hub.docker.com/r/greyfoxit/alpine-android/~/dockerfile/
@@ -33,8 +41,8 @@ RUN { \
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 
-ENV JAVA_VERSION 8u181
-ENV JAVA_ALPINE_VERSION 8.181.13-r0
+ENV JAVA_VERSION 8u212
+ENV JAVA_ALPINE_VERSION 8.212.04-r0
 
 RUN set -x \
 	&& apk add --no-cache \
@@ -51,46 +59,43 @@ RUN set -x \
 # https://github.com/jangrewe/gitlab-ci-android/issues/23
 # https://issuetracker.google.com/issues/66465833
 
-ENV VERSION_SDK_TOOLS=4333796 \
-	  ANDROID_HOME=/usr/local/android-sdk-linux
+ENV VERSION_SDK_TOOLS=4333796 
+ENV ANDROID_HOME "/sdk"
+ENV PATH "$PATH:${ANDROID_HOME}/tools"
 
-ENV	PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
+RUN apk update
+RUN apk add --no-cache bash bzip2 curl unzip git
 
-RUN mkdir -p $ANDROID_HOME && \
-    chown -R root.root $ANDROID_HOME && \
-    # Install dependencies
-    apk add --no-cache bash curl git openssl openssh-client ca-certificates && \
-    # Install Android SDK
-    wget -q -O sdk.zip http://dl.google.com/android/repository/sdk-tools-linux-$VERSION_SDK_TOOLS.zip && \
-    unzip sdk.zip -d $ANDROID_HOME && \
-    rm -f sdk.zip
+RUN curl -s https://dl.google.com/android/repository/sdk-tools-linux-${VERSION_SDK_TOOLS}.zip > /sdk.zip
+RUN unzip /sdk.zip -d /sdk
+RUN rm -v /sdk.zip
 
-    # Install and update Android packages
+RUN mkdir -p $ANDROID_HOME/licenses/
+RUN echo "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > $ANDROID_HOME/licenses/android-sdk-license
+RUN echo "84831b9409646a918e30573bab4c9c91346d8abd" > $ANDROID_HOME/licenses/android-sdk-preview-license
 
-ADD packages.txt $ANDROID_HOME
+# ADD packages.txt /sdk
+RUN mkdir -p /root/.android
+RUN touch /root/.android/repositories.cfg
+RUN ${ANDROID_HOME}/tools/bin/sdkmanager --update | grep -v = || true
 
-RUN mkdir -p /root/.android && \
-    touch /root/.android/repositories.cfg && \
-    sdkmanager --update && yes | sdkmanager --licenses
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "add-ons;addon-google_apis-google-24" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "build-tools;29.0.0" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;android;m2repository" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;google;m2repository" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;google;google_play_services" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "platform-tools" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "platforms;android-29" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses | grep -v = || true
 
-RUN sdkmanager "add-ons;addon-google_apis-google-24" --verbose
-RUN sdkmanager "add-ons;addon-google_apis-google-24" --verbose
-RUN sdkmanager "build-tools;28.0.3" --verbose
-RUN sdkmanager "extras;android;m2repository" --verbose
-RUN sdkmanager "extras;google;google_play_services" --verbose
-RUN sdkmanager "extras;google;m2repository" --verbose
-RUN sdkmanager "platform-tools" --verbose
-RUN sdkmanager "platforms;android-27" --verbose
-RUN sdkmanager "platforms;android-28" --verbose
-RUN sdkmanager "extras;google;instantapps" --verbose
-RUN sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2" --verbose
-RUN sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2" --verbose
 
-ENV GRADLE_VERSION=5.0
+ENV GRADLE_VERSION=5.5.1
 
 # Install Gradle
 RUN apk add --no-cache wget && \
-    wget https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
+    wget -nv https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip && \
     mkdir /opt/gradle && \
     unzip -d /opt/gradle gradle-$GRADLE_VERSION-bin.zip && \
     rm -rf gradle-$GRADLE_VERSION-bin.zip
@@ -102,8 +107,10 @@ ENV PATH ${PATH}:/opt/gradle/gradle-"$GRADLE_VERSION"/bin
 # Ref: https://github.com/frol/docker-alpine-glibc/blob/master/Dockerfile
 # install GNU C library (glibc)
 
+# Here we install GNU libc (aka glibc) and set C.UTF-8 locale as default.
+
 RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
-    ALPINE_GLIBC_PACKAGE_VERSION="2.28-r0" && \
+    ALPINE_GLIBC_PACKAGE_VERSION="2.29-r0" && \
     ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
@@ -118,7 +125,7 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
         Zvo9GI2e2MaZyo9/lvb+LbLEJZKEQckqRj4P26gmASrZEPStwc+yqy1ShHLA0j6m\
         1QIDAQAB\
         -----END PUBLIC KEY-----" | sed 's/   */\n/g' > "/etc/apk/keys/sgerrand.rsa.pub" && \
-    wget \
+    wget -nv \
         "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
         "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
         "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
@@ -139,8 +146,6 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
         "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
         "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
         "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
-
-ENV LANG=C.UTF-8
 
 # Credits:
 #
@@ -163,4 +168,4 @@ RUN npm install -g cordova@"$CORDOVA_VERSION"
 
 RUN rm -rf /root/.gradle/wrapper/dists/*
 
-ENV	PATH=$PATH:$ANDROID_HOME/build-tools/28.0.3
+ENV	PATH=$PATH:$ANDROID_HOME/build-tools/29.0.0
