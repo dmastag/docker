@@ -10,20 +10,25 @@ WORKDIR /usr/src/app
 
 ADD ./prebuild-alpine-node-openjdk-android-cordova /usr/src/app
 
-RUN cordova platform add android@8.0.0 && \
+RUN cordova platform add android@8.1.0 && \
     cordova prepare android && \
     cordova plugin add https://github.com/tripflex/wifiwizard2 && \
     cordova plugin add cordova-plugin-android-permissions && \
     cordova plugin add https://github.com/indodevniaga/GeolocationPlugin.git && \
     cordova plugin add https://github.com/indodevniaga/CamPlugin.git && \
-    cordova plugin add https://github.com/subhanrn/cordova-plugin-mockchecker
+    cordova plugin add https://github.com/subhanrn/cordova-plugin-mockchecker && \
+    cordova plugin add https://github.com/senjuid/autostartmanager && \
+    cordova plugin add https://github.com/tomykrisna/google-analytics-plugin && \
+    cordova plugin add https://github.com/senjuid/greatday-plugins.git
 
 RUN cordova build android -- --gradleArg=-PcdvMinSdkVersion=21 && \
-    cordova build android --release -- --gradleArg=-PcdvMinSdkVersion=21
+    cordova build android --release -- --gradleArg=-PcdvMinSdkVersion=21 && \
+    cordova build android --release -- --packageType=bundle --gradleArg=-PcdvMinSdkVersion=21
 
-RUN cordova plugin add cordova-plugin-crosswalk-webview && \
+RUN cordova plugin remove cordova-plugin-ionic-webview && \
+    cordova plugin add cordova-plugin-crosswalk-webview && \
     cordova build android -- --gradleArg=-PcdvMinSdkVersion=19 && \
     cordova build android --release -- --gradleArg=-PcdvMinSdkVersion=19
-    # cordova plugin rm cordova-plugin-crosswalk-webview && \
+
     
 RUN rm -r /usr/src/app/*
