@@ -154,6 +154,7 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
 
 # Install basics
 
+RUN npm config set unsafe-perm true
 
 ENV CORDOVA_VERSION=9.0.0
 
