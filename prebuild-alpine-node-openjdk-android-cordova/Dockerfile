@@ -10,6 +10,10 @@ WORKDIR /usr/src/app
 
 ADD ./prebuild-alpine-node-openjdk-android-cordova /usr/src/app
 
+RUN node --version && \
+    npm --version && \
+    cordova --version
+
 RUN cordova platform add android@8.1.0 && \
     cordova prepare android && \
     cordova plugin add https://github.com/tripflex/wifiwizard2 && \
