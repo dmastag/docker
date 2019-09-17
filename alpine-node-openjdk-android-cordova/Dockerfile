@@ -1,4 +1,4 @@
-FROM node:10-alpine
+FROM node:lts-alpine
 LABEL maintainer="Julian Alimin"
 
 # # Update References
@@ -41,8 +41,8 @@ RUN { \
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 
-ENV JAVA_VERSION 8u212
-ENV JAVA_ALPINE_VERSION 8.212.04-r1
+ENV JAVA_VERSION 8u222
+ENV JAVA_ALPINE_VERSION 8.222.10-r1
 
 RUN set -x \
 	&& apk add --no-cache \
@@ -80,7 +80,7 @@ RUN touch /root/.android/repositories.cfg
 RUN ${ANDROID_HOME}/tools/bin/sdkmanager --update | grep -v = || true
 
 RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "add-ons;addon-google_apis-google-24" | grep -v = || true
-RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "build-tools;29.0.0" | grep -v = || true
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "build-tools;29.0.2" | grep -v = || true
 RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;android;m2repository" | grep -v = || true
 RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;google;m2repository" | grep -v = || true
 RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;google;google_play_services" | grep -v = || true
@@ -91,7 +91,7 @@ RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager "platforms;android-29" | grep -v 
 RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses | grep -v = || true
 
 
-ENV GRADLE_VERSION=5.5.1
+ENV GRADLE_VERSION=5.6.2
 
 # Install Gradle
 RUN apk add --no-cache wget && \
@@ -110,7 +110,7 @@ ENV PATH ${PATH}:/opt/gradle/gradle-"$GRADLE_VERSION"/bin
 # Here we install GNU libc (aka glibc) and set C.UTF-8 locale as default.
 
 RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
-    ALPINE_GLIBC_PACKAGE_VERSION="2.29-r0" && \
+    ALPINE_GLIBC_PACKAGE_VERSION="2.30-r0" && \
     ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
@@ -125,7 +125,7 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
         Zvo9GI2e2MaZyo9/lvb+LbLEJZKEQckqRj4P26gmASrZEPStwc+yqy1ShHLA0j6m\
         1QIDAQAB\
         -----END PUBLIC KEY-----" | sed 's/   */\n/g' > "/etc/apk/keys/sgerrand.rsa.pub" && \
-    wget -nv \
+    wget \
         "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
         "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
         "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
@@ -155,7 +155,7 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
 # Install basics
 
 
-ENV CORDOVA_VERSION=8.1.2
+ENV CORDOVA_VERSION=9.0.0
 
 RUN npm install -g cordova@"$CORDOVA_VERSION"
 
@@ -168,4 +168,4 @@ RUN npm install -g cordova@"$CORDOVA_VERSION"
 
 RUN rm -rf /root/.gradle/wrapper/dists/*
 
-ENV	PATH=$PATH:$ANDROID_HOME/build-tools/29.0.0
+ENV	PATH=$PATH:$ANDROID_HOME/build-tools/29.0.2
